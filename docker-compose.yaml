@@ -1,0 +1,130 @@
+---
+version: '3.8'
+services:
+  zookeeper-1:
+    image: eu.gcr.io/mettle-bank/docker-zookeeper:3.6.2-34
+    hostname: zookeeper-1
+    container_name: zookeeper-1
+    security_opt:
+      - no-new-privileges
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128M
+      - /opt/zookeeper-conf:rw,noexec,nosuid,uid=1000,size=1M
+      - /zookeeper:rw,noexec,nosuid,uid=1000,size=100M
+    read_only: true
+    volumes:
+      - ./files/zookeeper-jmx-config.yaml:/etc/prometheus/zookeeper-jmx-config.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    ports:
+      - "2181:2181"
+      - "15555:5555"
+    environment:
+      ZOO_METRICS_PORT: 5555
+      ZOO_SERVERS_TOTAL: 1
+      ZOO_SERVER_DOMAIN: local
+      ZOO_SERVER_PREFIX: zookeeper-
+      ZOO_SERVER_ID: 1
+      JVMFLAGS: "-Xms256M -Xmx256M"
+
+  kafka-0:
+    image: eu.gcr.io/mettle-bank/docker-kafka:2.6.0-25
+    hostname: kafka-0
+    container_name: kafka-0
+    security_opt:
+      - no-new-privileges
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128M
+      - /opt/kafka-config:rw,noexec,nosuid,uid=1000,size=1M
+      - /opt/kafka-logs:rw,noexec,nosuid,uid=1000,size=512M
+    read_only: true
+    depends_on:
+      - zookeeper-1
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+    ports:
+      - "9092:29092"
+      - "5556:5556"
+    volumes:
+      - ./files/kafka-jmx-config.yaml:/etc/prometheus/kafka-jmx-config.yaml
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_BROKER_RACK: rack-0
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_LISTENERS: PLAINTEXT://kafka-0:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-0:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+
+  kafka-1:
+    image: eu.gcr.io/mettle-bank/docker-kafka:2.6.0-25
+    hostname: kafka-1
+    container_name: kafka-1
+    security_opt:
+      - no-new-privileges
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128M
+      - /opt/kafka-config:rw,noexec,nosuid,uid=1000,size=1M
+      - /opt/kafka-logs:rw,noexec,nosuid,uid=1000,size=512M
+    read_only: true
+    depends_on:
+      - zookeeper-1
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+    ports:
+      - "9093:9093"
+      - "5557:5556"
+    volumes:
+      - ./files/kafka-jmx-config.yaml:/etc/prometheus/kafka-jmx-config.yaml
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_RACK: rack-1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_LISTENERS: PLAINTEXT://kafka-1:29093,PLAINTEXT_HOST://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:29093,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+
+  kafka-2:
+    image: eu.gcr.io/mettle-bank/docker-kafka:2.6.0-25
+    hostname: kafka-2
+    container_name: kafka-2
+    security_opt:
+      - no-new-privileges
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128M
+      - /opt/kafka-config:rw,noexec,nosuid,uid=1000,size=1M
+      - /opt/kafka-logs:rw,noexec,nosuid,uid=1000,size=512M
+    read_only: true
+    depends_on:
+      - zookeeper-1
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+    ports:
+      - "9094:9094"
+      - "5558:5556"
+    volumes:
+      - ./files/kafka-jmx-config.yaml:/etc/prometheus/kafka-jmx-config.yaml
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_BROKER_RACK: rack-2
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+      KAFKA_LISTENERS: PLAINTEXT://kafka-2:29094,PLAINTEXT_HOST://localhost:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:29094,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_MIN_INSYNC_REPLICAS: 2

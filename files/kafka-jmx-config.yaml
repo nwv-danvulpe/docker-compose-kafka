@@ -1,0 +1,23 @@
+# https://github.com/prometheus/jmx_exporter
+startDelaySeconds: 0
+ssl: false
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false
+whitelistObjectNames:
+  - java.lang:*
+  - kafka.server:type=ReplicaManager,name=*
+  - kafka.controller:type=KafkaController,name=*
+  - kafka.controller:type=ControllerStats,name=*
+  - kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs
+  - kafka.server:type=BrokerTopicMetrics,name=*
+  - kafka.server:type=BrokerTopicMetrics,name=*,topic=*
+  - kafka.server:type=Produce,name=*
+  - kafka.server:type=SessionExpireListener,name=*
+  - kafka.server:type=ZooKeeperClientMetrics,name=*
+  - kafka.server:type=ReplicaFetcherManager,name=*,clientId=*
+  - kafka.server:type=KafkaRequestHandlerPool,name=*
+  - kafka.network:type=RequestMetrics,name=TotalTimeMs,*
+  - kafka.network:type=RequestMetrics,name=ErrorsPerSec,*
+  - kafka.network:type=RequestMetrics,name=RequestsPerSec,*
+  - kafka.network:type=Processor,*
+  - kafka.server:type=socket-server-metrics,*
